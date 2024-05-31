@@ -1,95 +1,75 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <h1>Welcome to this small reproduction</h1>
+      <span>It has zero styling. I'm sorry it's ugly.</span>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <h2>Programmatic navigation</h2>
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+      <span>
+        I'm fully aware you'd normally use Link here but for demo purposes I'm
+        using router.push().
+      </span>
+      <br />
+      <br />
+      <button
+        onClick={() => {
+          // To make sure we don't override existing URL params, we need to make sure we parse the existing ones
+          // and only set our own. Unfortunately this does replace any URL fragment (#foo) that might be set.
+          const currentSearchParams = new URLSearchParams(
+            searchParams.toString()
+          );
+          currentSearchParams.set("route", "one");
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+          router.push(`?${currentSearchParams.toString()}#myFragment`);
+        }}
+      >
+        Route one, this one adds a fragment.
+      </button>
+      <button
+        onClick={() => {
+          // As you can see, if we click this, the URL fragment is gone.
+          const currentSearchParams = new URLSearchParams(
+            searchParams.toString()
+          );
+          currentSearchParams.set("route", "two");
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
+          router.push(`?${currentSearchParams.toString()}`);
+        }}
+      >
+        Route Two, this one removes the fragment.
+      </button>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      <br />
+      <br />
+
+      <span>
+        Try clicking on "Route one" again so we get our fragment back.{" "}
+      </span>
+      <button
+        onClick={() => {
+          const currentSearchParams = new URLSearchParams(
+            searchParams.toString()
+          );
+          currentSearchParams.set("route", "three");
+
+          // We have to do some extra work to preserve the fragment, easy to miss.
+          const existingFragment = window.location.hash;
+          const newUrl = `?${currentSearchParams.toString()}${existingFragment}`;
+
+          router.push(newUrl);
+        }}
+      >
+        Route three, this one preserves the fragment.
+      </button>
+    </div>
   );
 }
